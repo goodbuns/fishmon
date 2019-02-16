@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "probes": {
+    "28-02089245bf26": {
+      "name": "left tank",
+      "feed": "fish.left-tank"
+    },
+    "28-020b924565c7": {
+      "name": "shrimp tank",
+      "feed": "fish.shrimp-tank"
+    }
+  }
+}
