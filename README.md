@@ -1,8 +1,9 @@
 # Fishmon
 
-`fishmon` is a monitoring for my home fish tanks. It runs on a Raspberry Pi
-2 Model B connected to a set of DS18B20 temperature probes. Fishmon constantly
-takes readings from those probes and uploads them to feeds on Adafruit.IO.
+`fishmon` is a monitoring system for my home fish tanks. It runs on a Raspberry
+Pi 2 Model B connected to a set of DS18B20 temperature probes. Fishmon
+constantly takes readings from those probes and uploads them to feeds on
+Adafruit.IO.
 
 ## Usage
 
@@ -29,8 +30,6 @@ same data and power connections. For example:
 
 ![DS18B20 breadboard](./docs/breadboard.png)
 
-I have 3 temperature probes chained this way.
-
 ### Running `fishmon`
 
 Fishmon requires an Adafruit.IO username and API key. To run Fishmon:
@@ -39,7 +38,8 @@ Fishmon requires an Adafruit.IO username and API key. To run Fishmon:
 fishmon -aio_username=YOUR_ADAFRUITIO_USERNAME -aio_key=YOUR_ADAFRUITIO_KEY
 ```
 
-You can leave `fishmon` after your session exits using standard Linux tricks:
+You can keep `fishmon` running after your session exits using standard Linux
+tricks:
 
 ```
 nohup fishmon -aio_username=YOUR_ADAFRUITIO_USERNAME -aio_key=YOUR_ADAFRUITIO_KEY &
@@ -49,14 +49,14 @@ See `fishmon -h` for details.
 
 ## Configuration
 
-In order to upload data to Adafruit.IO, `fishmon` needs to know which the right
-feed to send data for each probe. This is configured using a JSON file, which
-is located by default at `fishmonconfig.json`.
+In order to upload data to Adafruit.IO, `fishmon` needs to know which feed to
+send data to for each probe. This is configured using a JSON file, which
+`fishmon` will look for by default at `fishmonconfig.json`.
 
-You'll need to create your feeds on Adafruit.IO before you'll have the feed keys
-for configuration.
+You'll need to create your feeds on Adafruit.IO to get the feed keys for
+configuration.
 
-This file contains configuration for each probe:
+This file contains configurations for each probe:
 
 ```js
 {
@@ -87,7 +87,7 @@ implementations of RPI-specific sensors.
 Run `RPI=RASPBERRY_PI_USER@RASPBERRY_PI_HOST make deploy` to deploy. The
 deployment script just builds an ARM binary and `scp`'s the binary over.
 
-See [GoDoc](https://godoc.org/github.com/liftM/fishmon) for details.
+See [GoDoc](https://godoc.org/github.com/liftM/fishmon) for documentation.
 
 ### Future work
 
