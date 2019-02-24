@@ -4,8 +4,9 @@ package config
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
+
+	"github.com/pkg/errors"
 
 	"github.com/liftM/fishmon/pkg/ds18b20"
 )
@@ -31,12 +32,12 @@ type Probe struct {
 func New(filename string) (*File, error) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not read fishmon configuration file")
 	}
 	var file File
 	err = json.Unmarshal(bytes, &file)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not unmarshal fishmon configuration file")
 	}
 
 	return &file, nil

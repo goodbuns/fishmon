@@ -4,10 +4,11 @@ package adafruitio
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 // A Client provides authentication for Adafruit.IO API requests.
@@ -27,15 +28,15 @@ func New(username, AIOKey string) (*Client, error) {
 	// Check client credentials.
 	req, err := http.NewRequest(http.MethodGet, "https://io.adafruit.com/api/v2/user", nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not construct API request")
 	}
 	res, err := client.send(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not send API request")
 	}
 	err = check(res)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "API response has error")
 	}
 
 	return client, nil
@@ -49,7 +50,7 @@ func (c *Client) Record(feed, value string, timestamp time.Time) error {
 		CreatedAt: timestamp,
 	})
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not marshal API request body")
 	}
 
 	// Set request headers.
@@ -59,42 +60,50 @@ func (c *Client) Record(feed, value string, timestamp time.Time) error {
 		bytes.NewReader(payload),
 	)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not set API request headers")
 	}
 
 	// Send request.
 	res, err := c.send(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not send API request")
 	}
 
 	// Check response for errors.
 	defer res.Body.Close()
-	return check(res)
+	err = check(res)
+	if err != nil {
+		return errors.Wrap(err, "API response has errors")
+	}
+	return nil
 }
 
 func (c *Client) send(req *http.Request) (*http.Response, error) {
 	req.Header.Set("X-AIO-Key", c.aioKey)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
-	return http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not send HTTP request")
+	}
+	return res, nil
 }
 
 func check(res *http.Response) error {
 	// Parse response body.
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not read response body")
 	}
 	var r response
 	err = json.Unmarshal(body, &r)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "could not unmarshal response body")
 	}
 
 	// Check for application-level errors.
 	if r.Error != "" {
-		return errors.New(r.Error)
+		return errors.Wrap(errors.New(r.Error), "API response contains error")
 	}
 
 	return nil

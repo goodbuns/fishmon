@@ -3,11 +3,12 @@
 package ds18b20
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Operating system resource names.
@@ -38,16 +39,16 @@ type ID string
 func Ensure() error {
 	// Load modules.
 	if err := exec.Command(Modprobe, ModW1GPIO).Run(); err != nil {
-		return err
+		return errors.Wrap(err, "could not load w1-gpio kernel module")
 	}
 	if err := exec.Command(Modprobe, ModW1Therm).Run(); err != nil {
-		return err
+		return errors.Wrap(err, "could not load w1-therm kernel module")
 	}
 
 	// Check for master bus device file.
 	devices, err := ioutil.ReadDir(DevicesPath)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "could not read 1-Wire devices at %s", DevicesPath)
 	}
 	for _, device := range devices {
 		if strings.HasPrefix(device.Name(), MasterBusPrefix) {
@@ -61,7 +62,7 @@ func Ensure() error {
 func Sensors() ([]ID, error) {
 	files, err := ioutil.ReadDir(DevicesPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "could not read 1-Wire devices at %s", DevicesPath)
 	}
 
 	var sensors []ID
