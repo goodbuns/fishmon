@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Verify interfaces.
@@ -25,7 +27,7 @@ type Probe struct {
 func New(id ID) (*Probe, error) {
 	fd, err := os.Open(filepath.Join(filepath.Join(DevicesPath, string(id)), "w1_slave"))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not open sensor device file")
 	}
 	return &Probe{
 		ID: id,
@@ -38,11 +40,11 @@ func (p *Probe) Sense() (Temperature, error) {
 	// Re-seek to the beginning of the file to signal the hardware device to send
 	// a new reading.
 	if _, err := p.fd.Seek(0, 0); err != nil {
-		return ImpossibleTemperature, err
+		return ImpossibleTemperature, errors.Wrap(err, "could not seek sensor device file")
 	}
 	reading, err := ioutil.ReadAll(p.fd)
 	if err != nil {
-		return ImpossibleTemperature, err
+		return ImpossibleTemperature, errors.Wrap(err, "could not read sensor device file")
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(reading)), "\n")
@@ -62,7 +64,7 @@ func (p *Probe) Sense() (Temperature, error) {
 	}
 	temp, err := strconv.Atoi(lines[1][idx+2:])
 	if err != nil {
-		return ImpossibleTemperature, err
+		return ImpossibleTemperature, errors.Wrap(err, "could not convert sensor temperature reading to integer")
 	}
 
 	return Temperature(float32(temp) / 1000.0), nil
@@ -70,5 +72,9 @@ func (p *Probe) Sense() (Temperature, error) {
 
 // Close the underlying device file for this probe.
 func (p *Probe) Close() error {
-	return p.fd.Close()
+	err := p.fd.Close()
+	if err != nil {
+		return errors.Wrap(err, "could not close probe device file")
+	}
+	return nil
 }

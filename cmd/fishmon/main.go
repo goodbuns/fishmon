@@ -41,7 +41,7 @@ Usage of %s:
 	// Parse configuration.
 	conf, err := config.New(*configFile)
 	if err != nil {
-		log.Fatalf("could not parse configuration file: %s", err.Error())
+		log.Fatalf("could not parse configuration file at %s: %s", *configFile, err.Error())
 	}
 
 	// Set up system.
