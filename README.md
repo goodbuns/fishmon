@@ -93,3 +93,7 @@ See [GoDoc](https://godoc.org/github.com/liftM/fishmon) for documentation.
 
 At some point, I would like to set up uptime alerts (so I know when `fishmon`
 dies) and temperature alerts (so I know when to take action).
+
+## License
+
+Fishmon is licensed under the terms of the AGPLv3.
