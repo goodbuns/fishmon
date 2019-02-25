@@ -4,6 +4,7 @@ package adafruitio
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -78,8 +79,8 @@ func (c *Client) Record(feed, value string, timestamp time.Time) error {
 	return nil
 }
 
-// GetFeed returns all feeds of the Adafruit user.
-func (c *Client) GetFeed() ([]Feed, error) {
+// Feeds returns all feeds of an Adafruit user.
+func (c *Client) Feeds() ([]Feed, error) {
 	// Create request.
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -112,8 +113,44 @@ func (c *Client) GetFeed() ([]Feed, error) {
 	return feeds, nil
 }
 
+// FeedsInGroup returns all feeds for a given group of an Adafruit user.
+func (c *Client) FeedsInGroup(group string) ([]Feed, error) {
+	// Create request.
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"https://io.adafruit.com/api/v2/"+c.username+"/groups/"+group+"/feeds",
+		nil,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not set API request headers")
+	}
+
+	// Send request.
+	res, err := c.send(req)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not send API request")
+	}
+	defer res.Body.Close()
+
+	// Marshal response into Feed struct.
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not read response body")
+	}
+
+	var feeds []Feed
+	err = json.Unmarshal(body, &feeds)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not unmarshal response body for feed data")
+	}
+
+	return feeds, nil
+}
+
 func (c *Client) send(req *http.Request) (*http.Response, error) {
+	// if c.aioKey != "" {
 	req.Header.Set("X-AIO-Key", c.aioKey)
+	// }
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	res, err := http.DefaultClient.Do(req)
@@ -143,6 +180,10 @@ func check(res *http.Response) error {
 	return nil
 }
 
+func (f Feed) String() string {
+	return fmt.Sprintf("%#v", f)
+}
+
 type request struct {
 	Value     string    `json:"value"`
 	CreatedAt time.Time `json:"created_at"`
@@ -157,6 +198,6 @@ type Feed struct {
 	ID          int    `json:"id"`
 	Name        string `json:"name"`
 	LastValue   string `json:"last_value"`
-	LastUpdated string `json:"last_value_at"`
+	LastUpdated string `json:"updated_at"`
 	Key         string `json:"key"`
 }

@@ -6,25 +6,35 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/goodbuns/fishmon/pkg/adafruitio"
-	"github.com/goodbuns/fishmon/pkg/ds18b20"
 )
 
 func main() {
 	// Set up command-line flags.
 	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(), `%s starts the feed monitoring service..
+		fmt.Fprintf(flag.CommandLine.Output(), `%s starts the fmmon service.
 
+Fmmon requests feed information from Adafruit to monitor and alert on feed uptime and tank temperature values.
+	
 Usage of %s:
 `, os.Args[0], os.Args[0])
 		flag.PrintDefaults()
 	}
 	aioUser := flag.String("aio_username", "", "Adafruit.IO username")
 	aioKey := flag.String("aio_key", "", "Adafruit.IO key")
-	var minTemp, maxTemp float64
-	flag.Float64Var(&minTemp, "min_temp", 65.0, "Lowest temperature allowed before alerting, in degrees Fahrenheit. Default is 65.0.")
-	flag.Float64Var(&maxTemp, "max_temp", 83.0, "Highest temperature allowed before alerting, in degrees Fahrenheit. Default is 83.0.")
+	group := flag.String("group", "fish", "Group name of feeds to monitor.")
+	numFeeds := flag.Int("num_feeds", 0, "Expected number of online feeds within the specified group.")
+	minTemp := flag.Float64("min_temp", 65, "Lowest temperature allowed before alerting, in degrees Fahrenheit.")
+	maxTemp := flag.Float64("max_temp", 83, "Highest temperature allowed before alerting, in degrees Fahrenheit.")
+	flag.Parse()
+
+	log.Println(*minTemp)
+	log.Println(*maxTemp)
+	log.Println(*aioUser)
+	log.Println(*aioKey)
 
 	// Set up Adafruit.IO client.
 	client, err := adafruitio.New(*aioUser, *aioKey)
@@ -32,24 +42,47 @@ Usage of %s:
 		log.Fatalf("could not set up Adafruit.IO client: %s", err.Error())
 	}
 
-	// Find all sensors.
-	sensors, err := ds18b20.Sensors()
-	if err != nil {
-		log.Fatalf("could not detect DS18B20 sensors: %s", err.Error())
-	}
-	log.Printf("found %d sensors: %#v\n", len(sensors), sensors)
-
 	// Monitor Adafruit feed uptime.
 	for {
 		var feed []adafruitio.Feed
-		feed, err = client.GetFeed()
+		feed, err = client.FeedsInGroup(*group)
 		if err != nil {
 			log.Fatalf("could not get feed information from Adafruit: %s", err.Error())
 		}
-		analyze(&feed)
+
+		analyze(&feed, *numFeeds, *minTemp, *maxTemp)
+
+		time.Sleep(time.Second * 3)
 	}
 }
 
-func analyze(*[]adafruitio.Feed) {
-	// update later, should analyze the feed length, temperatures etc. to determine if alerts need to be sent
+func analyze(feeds *[]adafruitio.Feed, numFeeds int, minTemp, maxTemp float64) {
+	// Check number of feeds.
+	roleCall := false
+	if len(*feeds) < numFeeds {
+		alert("expected " + strconv.Itoa(numFeeds) + ", got " + strconv.Itoa(len(*feeds)))
+		roleCall = true
+	}
+
+	// Check temperatures of feeds.
+	for _, feed := range *feeds {
+		if roleCall {
+			alert(feed.Name + " still online")
+		}
+		temp, err := strconv.ParseFloat(feed.LastValue, 64)
+		if err != nil {
+			log.Println("could not parse feed value to float", err.Error())
+		}
+		if temp > maxTemp {
+			alert(feed.LastUpdated + ": " + feed.Name + " temperature too high - " + feed.LastValue)
+		}
+		if temp < minTemp {
+			alert(feed.LastUpdated + ": " + feed.Name + " temperature too low - " + feed.LastValue)
+		}
+	}
+}
+
+func alert(msg string) {
+	// TODO: update with slack integration in alert PR
+	log.Println(msg)
 }
