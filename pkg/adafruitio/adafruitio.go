@@ -78,6 +78,40 @@ func (c *Client) Record(feed, value string, timestamp time.Time) error {
 	return nil
 }
 
+// GetFeed returns all feeds of the Adafruit user.
+func (c *Client) GetFeed() ([]Feed, error) {
+	// Create request.
+	req, err := http.NewRequest(
+		http.MethodGet,
+		"https://io.adafruit.com/api/v2/"+c.username+"/feeds",
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Send request.
+	res, err := c.send(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	// Marshal response into Feed struct.
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var feeds []Feed
+	err = json.Unmarshal(body, &feeds)
+	if err != nil {
+		return nil, err
+	}
+
+	return feeds, nil
+}
+
 func (c *Client) send(req *http.Request) (*http.Response, error) {
 	req.Header.Set("X-AIO-Key", c.aioKey)
 	req.Header.Set("Content-Type", "application/json")
@@ -116,4 +150,13 @@ type request struct {
 
 type response struct {
 	Error string
+}
+
+// Feed is a struct containing feed information from AdaFruit.
+type Feed struct {
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	LastValue   string `json:"last_value"`
+	LastUpdated string `json:"last_value_at"`
+	Key         string `json:"key"`
 }
