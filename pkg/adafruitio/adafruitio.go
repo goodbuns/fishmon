@@ -87,26 +87,26 @@ func (c *Client) GetFeed() ([]Feed, error) {
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not set API request headers")
 	}
 
 	// Send request.
 	res, err := c.send(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not send API request")
 	}
 	defer res.Body.Close()
 
 	// Marshal response into Feed struct.
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not read response body")
 	}
 
 	var feeds []Feed
 	err = json.Unmarshal(body, &feeds)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "could not unmarshal response body for feed data")
 	}
 
 	return feeds, nil
