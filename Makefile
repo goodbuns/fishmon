@@ -16,8 +16,14 @@ $(BIN)/fmmon: $(shell find . -name *.go)
 	go build -o $@ $(CMD)
 
 deploy: $(BIN)/fishmon
-	@echo "-------> Deploying"
+	@echo "-------> Deploying fishmon"
 	GOOS=linux GOARCH=arm go build -o /tmp/fishmon-arm $(CMD)
 	test -n "$$RPI" || { echo "must set \$$RPI"; exit 1; }
 	scp /tmp/fishmon-arm $$RPI:./fishmon
 	scp fishmonconfig.json $$RPI:./fishmonconfig.json
+
+deploy: $(BIN)/fmmon
+	@echo "-------> Deploying fmmon"
+	GOOS=linux GOARCH=arm go build -o /tmp/fmmon-arm $(CMD)
+	test -n "$$RPI" || { echo "must set \$$RPI"; exit 1; }
+	scp /tmp/fmmon-arm $$RPI:./fmmon
