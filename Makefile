@@ -8,7 +8,11 @@ CMD=github.com/liftM/fishmon/cmd/fishmon
 all: $(BIN)/fishmon
 
 $(BIN)/fishmon: $(shell find . -name *.go)
-	@echo "-------> Building"
+	@echo "-------> Building fishmon"
+	go build -o $@ $(CMD)
+
+$(BIN)/monitor: $(shell find . -name *.go)
+	@echo "-------> Building monitoring service"
 	go build -o $@ $(CMD)
 
 deploy: $(BIN)/fishmon
