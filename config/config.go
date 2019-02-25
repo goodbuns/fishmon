@@ -8,7 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/liftM/fishmon/pkg/ds18b20"
+	"github.com/goodbuns/fishmon/pkg/ds18b20"
 )
 
 // Configuration errors.

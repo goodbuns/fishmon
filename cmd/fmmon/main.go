@@ -1,4 +1,4 @@
-// Service to monitor Adafruit feed uptime and temperatures.
+// Fmmon is a fishmon monitor that checks Adafruit feed uptime and temperature values.
 package main
 
 import (
@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/liftM/fishmon/pkg/adafruitio"
-	"github.com/liftM/fishmon/pkg/ds18b20"
+	"github.com/goodbuns/fishmon/pkg/adafruitio"
+	"github.com/goodbuns/fishmon/pkg/ds18b20"
 )
 
 func main() {

@@ -11,8 +11,8 @@ $(BIN)/fishmon: $(shell find . -name *.go)
 	@echo "-------> Building fishmon"
 	go build -o $@ $(CMD)
 
-$(BIN)/monitor: $(shell find . -name *.go)
-	@echo "-------> Building monitoring service"
+$(BIN)/fmmon: $(shell find . -name *.go)
+	@echo "-------> Building fmmon"
 	go build -o $@ $(CMD)
 
 deploy: $(BIN)/fishmon
