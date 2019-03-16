@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/goodbuns/fishmon/pkg/adafruitio"
-	"github.com/goodbuns/fishmon/pkg/fishmonbot"
+	"github.com/goodbuns/fishmon/pkg/fmmon"
 )
 
 func main() {
@@ -51,7 +51,7 @@ Usage of %s:
 	go func() {
 		time.Sleep(time.Second * 2)
 		for {
-			fishmonbot.Analyze(&feed, alerts, *numFeeds, *minTemp, *maxTemp, *webhookURL, true)
+			fmmon.Analyze(&feed, alerts, *numFeeds, *minTemp, *maxTemp, *webhookURL, true)
 			time.Sleep(time.Hour * 5)
 		}
 	}()
@@ -67,7 +67,7 @@ Usage of %s:
 					msg = msg + "\n" + <-alerts
 				}
 				msg = msg + "\n------------------------"
-				fishmonbot.Alert(msg, webhookURL)
+				fmmon.Alert(msg, webhookURL)
 				start = false
 			default:
 				if start {
@@ -84,11 +84,11 @@ Usage of %s:
 	for {
 		feed, err = client.FeedsInGroup(*group)
 		if err != nil {
-			fishmonbot.Alert(":alarm: Could not get feed information from Adafruit - feeds may be down!", *webhookURL)
+			fmmon.Alert(":alarm: Could not get feed information from Adafruit - feeds may be down!", *webhookURL)
 			log.Fatalf("could not get feed information from Adafruit: %s", err.Error())
 		}
 
-		fishmonbot.Analyze(&feed, alerts, *numFeeds, *minTemp, *maxTemp, *webhookURL, false)
+		fmmon.Analyze(&feed, alerts, *numFeeds, *minTemp, *maxTemp, *webhookURL, false)
 		time.Sleep(time.Second)
 	}
 }
