@@ -27,17 +27,19 @@ func New(username, AIOKey string) (*Client, error) {
 	}
 
 	// Check client credentials.
-	req, err := http.NewRequest(http.MethodGet, "https://io.adafruit.com/api/v2/user", nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not construct API request")
-	}
-	res, err := client.send(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "could not send API request")
-	}
-	err = check(res)
-	if err != nil {
-		return nil, errors.Wrap(err, "API response has error")
+	if client.aioKey != "" {
+		req, err := http.NewRequest(http.MethodGet, "https://io.adafruit.com/api/v2/user", nil)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not construct API request")
+		}
+		res, err := client.send(req)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not send API request")
+		}
+		err = check(res)
+		if err != nil {
+			return nil, errors.Wrap(err, "API response has error")
+		}
 	}
 
 	return client, nil
@@ -148,9 +150,7 @@ func (c *Client) FeedsInGroup(group string) ([]Feed, error) {
 }
 
 func (c *Client) send(req *http.Request) (*http.Response, error) {
-	// if c.aioKey != "" {
 	req.Header.Set("X-AIO-Key", c.aioKey)
-	// }
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	res, err := http.DefaultClient.Do(req)

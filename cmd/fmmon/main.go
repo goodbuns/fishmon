@@ -24,20 +24,20 @@ Usage of %s:
 		flag.PrintDefaults()
 	}
 	aioUser := flag.String("aio_username", "", "Adafruit.IO username")
-	aioKey := flag.String("aio_key", "", "Adafruit.IO key")
+	// aioKey := flag.String("aio_key", "", "Adafruit.IO key")
 	group := flag.String("group", "fish", "Group name of feeds to monitor.")
 	numFeeds := flag.Int("num_feeds", 0, "Expected number of online feeds within the specified group.")
 	minTemp := flag.Float64("min_temp", 65, "Lowest temperature allowed before alerting, in degrees Fahrenheit.")
 	maxTemp := flag.Float64("max_temp", 83, "Highest temperature allowed before alerting, in degrees Fahrenheit.")
 	flag.Parse()
 
-	log.Println(*minTemp)
-	log.Println(*maxTemp)
+	log.Println("min temp set", *minTemp)
+	log.Println("max temp set", *maxTemp)
 	log.Println(*aioUser)
-	log.Println(*aioKey)
+	// log.Println(*aioKey)
 
 	// Set up Adafruit.IO client.
-	client, err := adafruitio.New(*aioUser, *aioKey)
+	client, err := adafruitio.New(*aioUser, "")
 	if err != nil {
 		log.Fatalf("could not set up Adafruit.IO client: %s", err.Error())
 	}
