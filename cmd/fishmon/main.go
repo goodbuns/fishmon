@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/liftM/fishmon/config"
-	"github.com/liftM/fishmon/pkg/adafruitio"
-	"github.com/liftM/fishmon/pkg/ds18b20"
+	"github.com/goodbuns/fishmon/config"
+	"github.com/goodbuns/fishmon/pkg/adafruitio"
+	"github.com/goodbuns/fishmon/pkg/ds18b20"
 )
 
 // Configurable constants.
